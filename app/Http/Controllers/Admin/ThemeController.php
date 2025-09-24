@@ -53,9 +53,9 @@ class ThemeController extends Controller
         abort_if(Gate::denies('theme_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         // Only one theme can be active at a time
-        if ($request->boolean('is_active')) {
-            Theme::where('is_active', true)->update(['is_active' => false]);
-        }
+        // if ($request->boolean('is_active')) {
+        //     Theme::where('is_active', true)->update(['is_active' => false]);
+        // }
 
         $theme = Theme::create($request->validated());
 
@@ -93,11 +93,11 @@ class ThemeController extends Controller
         abort_if(Gate::denies('theme_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         // Only one theme can be active at a time
-        if ($request->boolean('is_active')) {
-            Theme::where('is_active', true)
-                ->where('id', '!=', $theme->id)
-                ->update(['is_active' => false]);
-        }
+        // if ($request->boolean('is_active')) {
+        //     Theme::where('is_active', true)
+        //         ->where('id', '!=', $theme->id)
+        //         ->update(['is_active' => false]);
+        // }
 
         $theme->update($request->validated());
 

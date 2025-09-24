@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\EmbedScriptController;
 
 Route::get('/lang/{locale}', function ($locale) {
     if (in_array($locale, array_keys(config('panel.available_languages')))) {
@@ -15,6 +16,8 @@ Route::get('/lang/{locale}', function ($locale) {
 Route::get('/', function () {
     return view('index');
 });
+
+Route::get('/embed.js', [EmbedScriptController::class, 'script']);
 
 // Route::get('/', function () {
 //     return view('welcome');

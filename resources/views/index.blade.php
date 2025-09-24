@@ -188,7 +188,6 @@
             <input type="text" class="chat-input" placeholder="Type a message...">
             <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
-
     </div>
 </div>
 
