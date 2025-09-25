@@ -25,18 +25,34 @@ class EmbedScriptController extends Controller
                 ->header('Content-Type', 'application/javascript');
         }
 
-        // ✅ Load Blade from resources/views/components/chat.blade.php
-        $html = view('components.chat', ['theme' => $project->theme])->render();
+        // Render Blade without <script>
+        $html = view('components.chat', [
+            'theme' => $project->theme,
+            'token' => $project->token
+        ])->render();
 
-        // ✅ Safely escape into JS string
-        $escapedHtml = json_encode($html);
+        // Extract inline script manually
+        preg_match('/<script>([\s\S]*)<\/script>/', $html, $matches);
+        $inlineScript = $matches[1] ?? '';
+
+        // Remove the <script> block from HTML
+        $htmlWithoutScript = preg_replace('/<script>[\s\S]*<\/script>/', '', $html);
+
+        // Escape HTML for JS string
+        $escapedHtml = json_encode($htmlWithoutScript);
 
         $js = <<<JAVASCRIPT
             (function() {
                 try {
+                    // Inject HTML
                     var container = document.createElement('div');
                     container.innerHTML = $escapedHtml;
                     document.body.appendChild(container);
+
+                    // Run inline script AFTER DOM has the widget
+                    (function() {
+                        $inlineScript
+                    })();
                 } catch (e) {
                     console.error("Embed error", e);
                 }

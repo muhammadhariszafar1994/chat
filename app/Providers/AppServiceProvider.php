@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // $origins = \App\Models\Project::pluck('client_url')->filter()->toArray();
+        // config(['cors.allowed_origins' => $origins]);
     }
 }

@@ -13,20 +13,22 @@ class OpenAIChatController extends Controller
      * @param null $previousResponseId
      * @return array
      */
-    private function generateResponse($userInput, $previousResponseId = null): array
+    private function generateResponse($openai, $userInput, $previousResponseId = null): array
     {
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                // 'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+
+                'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
             ])->post('https://api.openai.com/v1/responses', [
                 "prompt" => [
-                    "id" => env('OPENAI_PROMPT_ID'),
+                    "id" => $openai['OPENAI_PROMPT_ID'],
                     "version" => "5"
                 ],
                 "input" => $userInput,
-//                "instructions" => $previousResponseId,
-//                "previous_response_id" => $previousResponseId,
+                // "instructions" => $previousResponseId,
+                // "previous_response_id" => $previousResponseId,
             ]);
 
             $data = $response->json();
@@ -58,7 +60,7 @@ class OpenAIChatController extends Controller
      */
     public function index()
     {
-        $response = $this->generateResponse('Hello');
+        $response = $this->generateResponse($openai, 'Hello');
         $msg = $response['msg'] ?? [];
 
         return response()->json([
@@ -76,20 +78,30 @@ class OpenAIChatController extends Controller
      */
     public function store(Request $request)
     {
-        $userInput = $request->message;
-        $previousResponseId = $request->previous_response_id;
+        try {
+            $openai = $request->attributes->get('openai');
 
-        $response = $this->generateResponse($userInput, $previousResponseId);
-        $msg = $response['msg'] ?? [];
+            $userInput = $request->message;
+            $previousResponseId = $request->previous_response_id;
 
-        $response['user_input'] = $userInput;
-        $response['previous_response_id'] = $previousResponseId;
+            $response = $this->generateResponse($openai, $userInput, $previousResponseId);
+            $msg = $response['msg'] ?? [];
 
-        return response()->json([
-            'reply' => $msg['reply'],
-            'response_id' => $msg['response_id'],
-            'debug' => $response,
-        ]);
+            $response['user_input'] = $userInput;
+            $response['previous_response_id'] = $previousResponseId;
+
+            return response()->json([
+                'reply' => $msg['reply'],
+                'response_id' => $msg['response_id'],
+                'debug' => $response,
+            ]);
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'data' => $exception->getMessage(),
+                'msg' => $exception->getMessage(),
+            ];
+        }
     }
 
 }
