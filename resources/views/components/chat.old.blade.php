@@ -213,82 +213,115 @@
  </div>
 
 <script>
-(function () {
-    const chatWidget = document.querySelector('.chat-widget');
-    const chatToggleBtn = document.querySelector('.chat-toggle-btn');
-    const closeBtn = document.querySelector('.close-btn');
-    const chatMessages = document.querySelector('.chat-messages');
-    const sendBtn = document.querySelector('.send-btn');
-    const chatInput = document.querySelector('.chat-input');
-    const loader = document.querySelector('.loader');
+    (function() {
+        const chatWidget = document.querySelector('.chat-widget');
+        const chatToggleBtn = document.querySelector('.chat-toggle-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const messageCounter = document.querySelector('.message-counter');
+        const chatMessages = document.querySelector('.chat-messages');
+        const sendBtn = document.querySelector('.send-btn');
+        const chatInput = document.querySelector('.chat-input');
+        const loader = document.querySelector('.loader');
 
-    // Show/hide widget
-    function toggleWidget(open = true) {
-        if (open) {
-            chatWidget.style.display = 'flex';
-            setTimeout(() => {
-                chatWidget.style.height = '400px';
-                chatWidget.style.opacity = '1';
-            }, 10);
-        } else {
-            chatWidget.style.height = '0';
-            chatWidget.style.opacity = '0';
-            setTimeout(() => {
-                chatWidget.style.display = 'none';
-            }, 500);
+        let lastResponseId = null;
+        let messageCount = 1;
+
+        if (chatToggleBtn) {
+            chatToggleBtn.addEventListener('click', function() {
+                if (chatWidget.style.display === 'none' || chatWidget.style.display === '') {
+                    chatWidget.style.display = 'flex';
+                    setTimeout(() => {
+                        chatWidget.style.height = '400px';
+                        chatWidget.style.opacity = '1';
+                    }, 10);
+                } else {
+                    chatWidget.style.height = '0';
+                    chatWidget.style.opacity = '0';
+                    setTimeout(() => {
+                        chatWidget.style.display = 'none';
+                    }, 500);
+                }
+            });
         }
-    }
 
-    // Append message to chat
-    function appendMessage(text, role = 'visitor') {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', role === 'user' ? 'visitor' : 'userBot');
-        msgDiv.textContent = text;
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // Send message to Laravel backend (only user input)
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        appendMessage(message, 'user');
-        chatInput.value = '';
-        loader.style.display = 'block';
-
-        fetch("{{ config('app.url') }}/api/openai/conversation/conv_68dad951cd68819583fa4ea85de0c5ad0f6da3b13fbc6b25", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Token-Header": "{{ $token ?? '' }}"
-            },
-            body: JSON.stringify({ message })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const reply = data.reply || 'No response.';
-            appendMessage(reply, 'assistant');
-        })
-        .catch(error => {
-            console.error("Chat error:", error);
-            appendMessage("Oops! Something went wrong.", 'assistant');
-        })
-        .finally(() => {
-            loader.style.display = 'none';
-        });
-    }
-
-    // Listeners
-    sendBtn?.addEventListener('click', sendMessage);
-    chatInput?.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                chatWidget.style.height = '0';
+                chatWidget.style.opacity = '0';
+                setTimeout(() => {
+                    chatWidget.style.display = 'none';
+                }, 500);
+            });
         }
-    });
 
-    chatToggleBtn?.addEventListener('click', () => toggleWidget(true));
-    closeBtn?.addEventListener('click', () => toggleWidget(false));
-})();
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message !== '') {
+                const messageDiv = document.createElement('div');
+                messageDiv.textContent = message;
+                messageDiv.classList.add('message', 'visitor');
+                chatMessages.appendChild(messageDiv);
+                messageCount++;
+                if (messageCounter) {
+                    messageCounter.textContent = `Messages: ${messageCount}`;
+                }
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                loader.style.display = 'block';
+                sendMessageToServer(message);
+            }
+        }
+
+        function sendMessageToServer(message) {
+            fetch('{{ config('app.url') }}/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-Token-Header": "{{ $token ?? '' }}"
+                },
+                body: JSON.stringify({
+                    message: message,
+                    previous_response_id: lastResponseId,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                appendServerReply(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                loader.style.display = 'none';
+            });
+        }
+
+        function appendServerReply(output) {
+            lastResponseId = output.response_id;
+            const replyDiv = document.createElement('div');
+            replyDiv.textContent = output.reply;
+            replyDiv.classList.add('message', 'userBot');
+            replyDiv.setAttribute('data-resp_id', lastResponseId);
+            chatMessages.appendChild(replyDiv);
+            messageCount++;
+            if (messageCounter) {
+                messageCounter.textContent = `Messages: ${messageCount}`;
+            }
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', sendMessage);
+        }
+
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                    event.preventDefault();
+                }
+            });
+        }
+    })();
 </script>

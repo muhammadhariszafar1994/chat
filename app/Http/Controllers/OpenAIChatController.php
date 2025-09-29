@@ -4,9 +4,72 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Services\OpenAIService;
 
 class OpenAIChatController extends Controller
 {
+    protected $openAIService;
+
+    public function __construct(
+        OpenAIService $openAIService
+    )
+    {
+        $this->openAIService = $openAIService;
+    }
+
+    public function showChatPage()
+    {
+        $conversationId = null;
+        $responses = [];
+
+        return view('openai', compact('conversationId', 'responses'));
+    }
+
+    public function createConversation(Request $request)
+    {
+        $openai = $request->attributes->get('openai');
+        $conversation = $this->openAIService->createConversation($openai);
+
+        if ($conversation) {
+            return response()->json([
+                'message' => 'Conversation created successfully!',
+                'conversation_id' => $conversation['id'],
+            ]);
+        } else {
+            return response()->json(['message' => 'Failed to create conversation'], 500);
+        }
+    }
+
+    public function sendMessageToConversation(Request $request, $conversationId)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $message = $request->input('message');
+        $openai = $request->attributes->get('openai');
+        $response = $this->openAIService->sendMessageToConversation($openai, $conversationId, $message);
+
+        if ($response) {
+            return response()->json(['message' => 'Message sent successfully!', 'response' => $response]);
+        } else {
+            return response()->json(['message' => 'Failed to send message'], 500);
+        }
+    }
+
+    public function getConversationResponses($conversationId)
+    {
+        $openai = $request->attributes->get('openai');
+        $responses = $this->openAIService->getConversationResponses($openai, $conversationId);
+
+        if ($responses) {
+            return response()->json(['conversation_responses' => $responses]);
+        } else {
+            return response()->json(['message' => 'Failed to retrieve conversation responses'], 500);
+        }
+    }
+
+
 
     /**
      * @param $userInput
@@ -17,18 +80,14 @@ class OpenAIChatController extends Controller
     {
         try {
             $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                // 'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
-
                 'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
+                'Content-Type' => 'application/json',
             ])->post('https://api.openai.com/v1/responses', [
                 "prompt" => [
                     "id" => $openai['OPENAI_PROMPT_ID'],
                     "version" => "5"
                 ],
                 "input" => $userInput,
-                // "instructions" => $previousResponseId,
-                // "previous_response_id" => $previousResponseId,
             ]);
 
             $data = $response->json();
@@ -60,6 +119,8 @@ class OpenAIChatController extends Controller
      */
     public function index()
     {
+        $openai = $request->attributes->get('openai');
+
         $response = $this->generateResponse($openai, 'Hello');
         $msg = $response['msg'] ?? [];
 

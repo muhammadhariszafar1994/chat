@@ -13,7 +13,6 @@ class GlobalCorsFromProjects
     {
         $origin = rtrim($request->headers->get('Origin'), '/');
 
-        // Get current backend URL (same-origin)
         $host = $request->getSchemeAndHttpHost();
 
         // If local environment, allow everything

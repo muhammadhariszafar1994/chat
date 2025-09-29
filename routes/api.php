@@ -13,7 +13,12 @@ Route::get('/user', function (Request $request) {
 Route::middleware([
     VerifyToken::class,
     GlobalCorsFromProjects::class
-])->group(function () {
-    Route::get('chat', [OpenAIChatController::class, 'index']);
-    Route::post('chat', [OpenAIChatController::class, 'store']);
+])->prefix('openai')->group(function () {
+    Route::get('/', [OpenAIChatController::class, 'showChatPage'])->name('openai.chat');
+    Route::post('/conversation', [OpenAIChatController::class, 'createConversation']);
+    Route::post('/conversation/{conversationId}', [OpenAIChatController::class, 'sendMessageToConversation']);
+    Route::get('/conversation/{conversationId}', [OpenAIChatController::class, 'getConversationResponses']);
 });
+
+// Route::get('chat', [OpenAIChatController::class, 'index']);
+    // Route::post('chat', [OpenAIChatController::class, 'store']);
