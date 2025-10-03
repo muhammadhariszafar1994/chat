@@ -183,7 +183,7 @@
     // echo "</pre>";
 ?>
 
-<div class="chat-widget" style="background-color: {{ $theme['chat_body_bg_color'] }}">
+<div class="chat-widget" style="background-color: {{ $theme['chat_body_bg_color'] }}; display:none;">
     <div 
         class="chat-header" 
         style="background-color: {{ $theme['chat_header_bg_color'] }}; color: {{ $theme['chat_header_text_color'] }}; font-family: {{ $theme['chat_header_font_family'] }}; font-size: {{ $theme['chat_header_font_size'] }}px"
@@ -193,7 +193,7 @@
     </div>
     <div class="chat-body">
         <div class="chat-messages">
-            <div class="message userBot">Hello! How can I help you today?</div>
+            <!-- <div class="message userBot">Hello! How can I help you today?</div> -->
 
             <div class="loader" style="display: none;"></div>
         </div>
@@ -208,87 +208,134 @@
 
 <!-- Add toggle button -->
 <!-- <div class="chat-toggle-btn">💬</div> -->
- <div class="chat-toggle-btn" style="background-color: {{ $theme['chat_toggle_bg_color'] }}">
+<div class="chat-toggle-btn" style="background-color: {{ $theme['chat_toggle_bg_color'] }}">
     <img src="{{ $theme->getFirstMediaUrl('chat_toggle_image') }}" alt="Chat Button Image" style="width: 100%;">
- </div>
+</div>
 
 <script>
-(function () {
-    const chatWidget = document.querySelector('.chat-widget');
-    const chatToggleBtn = document.querySelector('.chat-toggle-btn');
-    const closeBtn = document.querySelector('.close-btn');
-    const chatMessages = document.querySelector('.chat-messages');
-    const sendBtn = document.querySelector('.send-btn');
-    const chatInput = document.querySelector('.chat-input');
-    const loader = document.querySelector('.loader');
+    (function () {
+        const chatWidget = document.querySelector('.chat-widget');
+        const chatToggleBtn = document.querySelector('.chat-toggle-btn');
+        const closeBtn = document.querySelector('.close-btn');
+        const chatMessages = document.querySelector('.chat-messages');
+        const sendBtn = document.querySelector('.send-btn');
+        const chatInput = document.querySelector('.chat-input');
+        const loader = document.querySelector('.loader');
 
-    // Show/hide widget
-    function toggleWidget(open = true) {
-        if (open) {
-            chatWidget.style.display = 'flex';
-            setTimeout(() => {
-                chatWidget.style.height = '400px';
-                chatWidget.style.opacity = '1';
-            }, 10);
-        } else {
-            chatWidget.style.height = '0';
-            chatWidget.style.opacity = '0';
-            setTimeout(() => {
-                chatWidget.style.display = 'none';
-            }, 500);
+        // show/hide widget
+        function toggleWidget(open = true) {
+            if (open) {
+                chatWidget.style.display = 'flex';
+                setTimeout(() => {
+                    chatWidget.style.height = '400px';
+                    chatWidget.style.opacity = '1';
+                }, 10);
+            } else {
+                chatWidget.style.height = '0';
+                chatWidget.style.opacity = '0';
+                setTimeout(() => {
+                    chatWidget.style.display = 'none';
+                }, 500);
+            }
         }
-    }
 
-    // Append message to chat
-    function appendMessage(text, role = 'visitor') {
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('message', role === 'user' ? 'visitor' : 'userBot');
-        msgDiv.textContent = text;
-        chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+        // append message to chat
+        function appendMessage(text, role = 'visitor') {
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message', role === 'user' ? 'visitor' : 'userBot');
+            msgDiv.textContent = text;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-    // Send message to Laravel backend (only user input)
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        if (!message) return;
+        // send message
+        function postConversation() {
+            const message = chatInput.value.trim();
+            if (!message) return;
 
-        appendMessage(message, 'user');
-        chatInput.value = '';
-        loader.style.display = 'block';
+            appendMessage(message, 'user');
+            chatInput.value = '';
+            loader.style.display = 'block';
 
-        fetch("{{ config('app.url') }}/api/openai/conversation/conv_68dad951cd68819583fa4ea85de0c5ad0f6da3b13fbc6b25", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Token-Header": "{{ $token ?? '' }}"
-            },
-            body: JSON.stringify({ message })
-        })
-        .then(res => res.json())
-        .then(data => {
-            const reply = data.reply || 'No response.';
-            appendMessage(reply, 'assistant');
-        })
-        .catch(error => {
-            console.error("Chat error:", error);
-            appendMessage("Oops! Something went wrong.", 'assistant');
-        })
-        .finally(() => {
-            loader.style.display = 'none';
+            fetch("{{ config('app.url') }}/api/openai/conversation", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Token-Header": "{{ $token ?? '' }}"
+                },
+                body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                // const reply = data.reply || 'No response.';
+                // appendMessage(reply, 'assistant');
+
+                getConversation();
+            })
+            .catch(error => {
+                console.error("Chat error:", error);
+                appendMessage("Oops! Something went wrong.", 'assistant');
+            })
+            .finally(() => {
+                loader.style.display = 'none';
+            });
+        }
+
+        // fetch messages
+        async function getConversation() {
+            loader.style.display = 'block';
+
+            try {
+                const res = await fetch("{{ config('app.url') }}/api/openai/conversation", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Token-Header": "{{ $token ?? '' }}"
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+
+                const data = await res.json();
+
+                if (data && Array.isArray(data?.data?.data)) {
+                    chatMessages.innerHTML = ''; // clear old messages
+
+                    data.data.data.reverse().forEach(msg => {
+                        const role = msg.role === 'user' ? 'user' : 'assistant';
+                        const textObj = msg.content?.find(c => c.text);
+                        const text = textObj?.text;
+
+                        if (text) {
+                            appendMessage(text, role);
+                        }
+                    });
+                } else {
+                    appendMessage("Unexpected data format from server.", "assistant");
+                    console.warn("Unexpected API structure:", data);
+                }
+            } catch (error) {
+                console.error("Chat error:", error);
+                appendMessage("Failed to load chat history.", "assistant");
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        getConversation();
+
+        // listeners
+        sendBtn?.addEventListener('click', postConversation);
+        chatInput?.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                postConversation();
+            }
         });
-    }
 
-    // Listeners
-    sendBtn?.addEventListener('click', sendMessage);
-    chatInput?.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-
-    chatToggleBtn?.addEventListener('click', () => toggleWidget(true));
-    closeBtn?.addEventListener('click', () => toggleWidget(false));
-})();
+        chatToggleBtn?.addEventListener('click', () => toggleWidget(true));
+        closeBtn?.addEventListener('click', () => toggleWidget(false));
+    })();
 </script>

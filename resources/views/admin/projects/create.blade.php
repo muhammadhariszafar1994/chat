@@ -27,16 +27,16 @@
                         </div>
 
                         {{-- Script --}}
-                        <div>
+                        <!-- <div>
                             <x-input-label for="script" :value="__('admin/project.attributes.script')" />
                             <textarea 
                                 id="script" 
                                 name="script" 
                                 rows="5" 
                                 class="mt-1 block w-full border rounded p-2"
-                            >{{ old('script') }}</textarea>
+                            >{{-- old('script') --}}</textarea>
                             <x-input-error :messages="$errors->get('script')" class="mt-2" />
-                        </div>
+                        </div> -->
 
                         {{-- OpenAI API Key --}}
                         <div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\ProjectController;
+use App\Http\Controllers\Admin\VisitorController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\CheckInternalUserStatus;
@@ -44,4 +45,7 @@ Route::middleware([AdminAuthenticate::class, CheckInternalUserStatus::class])->g
 
     // Project
     Route::resource('/projects', ProjectController::class);
+
+    // Project
+    Route::resource('/visitors', VisitorController::class);
 });

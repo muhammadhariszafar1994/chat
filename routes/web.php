@@ -20,13 +20,6 @@ Route::get('/', function () {
 
 Route::get('/embed.js', [EmbedScriptController::class, 'script']);
 
-Route::prefix('openai')->group(function () {
-    Route::get('/', [OpenAIChatController::class, 'showChatPage'])->name('openai.chat');
-    Route::post('/conversation', [OpenAIChatController::class, 'createConversation']);
-    Route::post('/conversation/{conversationId}', [OpenAIChatController::class, 'sendMessageToConversation']);
-    Route::get('/conversation/{conversationId}', [OpenAIChatController::class, 'getConversationResponses']);
-});
-
 // Route::get('/', function () {
 //     return view('welcome');
 // });

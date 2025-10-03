@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Services\OpenAIService;
+use App\Models\Visitor;
 
 class OpenAIChatController extends Controller
 {
@@ -17,37 +18,18 @@ class OpenAIChatController extends Controller
         $this->openAIService = $openAIService;
     }
 
-    public function showChatPage()
-    {
-        $conversationId = null;
-        $responses = [];
-
-        return view('openai', compact('conversationId', 'responses'));
-    }
-
-    public function createConversation(Request $request)
-    {
-        $openai = $request->attributes->get('openai');
-        $conversation = $this->openAIService->createConversation($openai);
-
-        if ($conversation) {
-            return response()->json([
-                'message' => 'Conversation created successfully!',
-                'conversation_id' => $conversation['id'],
-            ]);
-        } else {
-            return response()->json(['message' => 'Failed to create conversation'], 500);
-        }
-    }
-
-    public function sendMessageToConversation(Request $request, $conversationId)
+    public function sendMessageToConversation(Request $request)
     {
         $request->validate([
             'message' => 'required|string',
         ]);
 
-        $message = $request->input('message');
+        $ip = $request->ip();
         $openai = $request->attributes->get('openai');
+        $message = $request->input('message');
+
+        $conversationId = $this->findOrCreateConversation($ip, $openai);
+        
         $response = $this->openAIService->sendMessageToConversation($openai, $conversationId, $message);
 
         if ($response) {
@@ -57,16 +39,40 @@ class OpenAIChatController extends Controller
         }
     }
 
-    public function getConversationResponses($conversationId)
+    public function getConversationResponses(Request $request)
     {
+        $ip = $request->ip();
         $openai = $request->attributes->get('openai');
+
+        $conversationId = $this->findOrCreateConversation($ip, $openai);
         $responses = $this->openAIService->getConversationResponses($openai, $conversationId);
 
         if ($responses) {
-            return response()->json(['conversation_responses' => $responses]);
+            return response()->json(['data' => $responses]);
         } else {
             return response()->json(['message' => 'Failed to retrieve conversation responses'], 500);
         }
+    }
+
+    private function findOrCreateConversation($ip = null, $openai = null) {
+        $conversationId = null;
+        $visitor = Visitor::query()->whereIpAddress($ip)->first();
+
+        if(!$visitor) {
+            $conversation = $this->openAIService->generateConversation($openai);
+            if($conversation) $conversationId = $conversation['id'];
+            
+            $visitor = Visitor::query()->create([
+                'ip_address' => $ip,
+                'conversation_id' => $conversationId
+            ]);
+
+            return $conversationId;
+        }
+
+        $conversationId = $visitor['conversation_id'];
+
+        return $conversationId;
     }
 
 

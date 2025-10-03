@@ -30,13 +30,16 @@
                         {{-- Script --}}
                         <div>
                             <x-input-label for="script" :value="__('admin/project.attributes.script')" />
-                            <textarea 
+                            <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 select-all">
+                                {{ $project->script }}
+                            </p>
+                            <!-- <textarea 
                                 id="script" 
                                 name="script" 
                                 rows="5" 
                                 class="mt-1 block w-full border rounded p-2"
                             >{{ old('script', $project->script) }}</textarea>
-                            <x-input-error :messages="$errors->get('script')" class="mt-2" />
+                            <x-input-error :messages="$errors->get('script')" class="mt-2" /> -->
                         </div>
 
                         {{-- OpenAI API Key --}}
@@ -77,6 +80,14 @@
                                 placeholder="https://example.com"
                             />
                             <x-input-error :messages="$errors->get('client_url')" class="mt-2" />
+                        </div>
+
+                        {{-- Token (Display Only) --}}
+                        <div>
+                            <x-input-label for="token" :value="__('admin/project.attributes.token')" />
+                            <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                                {{ $project->token }}
+                            </p>
                         </div>
 
                         {{-- Theme --}}

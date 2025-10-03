@@ -14,20 +14,17 @@ class OpenAIService
     {
         $this->apiKey = env('OPENAI_API_KEY');
         $this->assistantId = env('OPENAI_PROMPT_ID');
-        
         $this->baseUrl = 'https://api.openai.com/v1';
     }
 
-    public function createConversation($openai, $topic = 'demo')
+    public function generateConversation($openai, $topic = 'demo')
     {
         $data = [
-            'metadata' => [
-                'assistant_id' => $openai['OPENAI_PROMPT_ID']
-            ]
+            'metadata' => [ 'assistant_id' => $openai['OPENAI_PROMPT_ID'] ]
         ];
 
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/conversations', $data);
 
@@ -47,7 +44,7 @@ class OpenAIService
         ];
 
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/responses', $data);
 
@@ -57,9 +54,9 @@ class OpenAIService
     public function getConversationResponses($openai, $conversationId)
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
             'Content-Type' => 'application/json',
-        ])->get($this->baseUrl . '/conversations/' . $conversationId);
+        ])->get($this->baseUrl . '/conversations/' . $conversationId . '/items');
 
         return $response->successful() ? $response->json() : null;
     }

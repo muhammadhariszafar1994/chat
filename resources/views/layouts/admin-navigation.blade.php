@@ -75,6 +75,10 @@
                             <x-dropdown-link :href="route('admin.projects.index')">
                                 Project
                             </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('admin.visitors.index')">
+                                Visitor
+                            </x-dropdown-link>
                         @endif
 
                         @if (Auth::user()->isAdmin())

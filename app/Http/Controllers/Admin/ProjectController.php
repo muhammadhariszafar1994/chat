@@ -59,6 +59,11 @@ class ProjectController extends Controller
         $data = $request->validated();
         $data['token'] = Str::uuid(); // Automatically generate token
 
+        // Build script tag using APP_URL
+        $baseUrl = rtrim(config('app.url'), '/'); // ensures no trailing slash
+        $script = '<script async src="' . $baseUrl . '/embed.js?token=' . $data['token'] . '"></script>';
+        $data['script'] = $script;
+
         Project::create($data);
 
         return redirect()

@@ -39,7 +39,12 @@ class PermissionsTableSeeder extends Seeder
             'project_create',
             'project_view',
             'project_edit',
-            'project_delete'
+            'project_delete',
+            'visitor_access',
+            'visitor_create',
+            'visitor_view',
+            'visitor_edit',
+            'visitor_delete'
         ];
 
         foreach ($permissions as $permission) {
