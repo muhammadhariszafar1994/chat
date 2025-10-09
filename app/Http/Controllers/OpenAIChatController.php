@@ -170,5 +170,4 @@ class OpenAIChatController extends Controller
             ];
         }
     }
-
 }

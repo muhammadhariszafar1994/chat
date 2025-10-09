@@ -104,6 +104,23 @@
                             <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
                         </div>
 
+                        {{-- Image Generation (Select) --}}
+                        <div>
+                            <x-input-label for="image_generation" :value="__('admin/project.attributes.image_generation')" />
+                            <x-select-input
+                                :options="[
+                                    0 => __('global.no'),
+                                    1 => __('global.yes'),
+                                ]"
+                                id="image_generation"
+                                name="image_generation"
+                                class="mt-1 block w-full"
+                                :selected="old('image_generation')"
+                            />
+                            <x-input-error :messages="$errors->get('image_generation')" class="mt-2" />
+                        </div>
+
+
                         {{-- Buttons --}}
                         <div class="flex items-center gap-4">
                             <a href="{{ route('admin.projects.index') }}">

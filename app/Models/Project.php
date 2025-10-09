@@ -18,6 +18,7 @@ class Project extends Model
         'client_url',
         'theme_id',
         'user_id',
+        'image_generation'
     ];
 
     /**

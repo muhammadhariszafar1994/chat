@@ -9,9 +9,17 @@ use App\Models\Visitor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\OpenAIService;
 
 class VisitorController extends Controller
 {
+    protected $openAIService;
+
+    public function __construct( OpenAIService $openAIService )
+    {
+        $this->openAIService = $openAIService;
+    }
+    
     /**
      * Display a listing of visitors.
      */
