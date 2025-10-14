@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ThemeController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\VisitorController;
+use App\Http\Controllers\Admin\OpenAIAdminController;
 use App\Http\Controllers\Admin\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\CheckInternalUserStatus;
@@ -48,4 +49,27 @@ Route::middleware([AdminAuthenticate::class, CheckInternalUserStatus::class])->g
 
     // Project
     Route::resource('/visitors', VisitorController::class);
+
+    Route::prefix('openai-projects')->name('openai-projects.')->group(function () {
+        // List Projects
+        Route::get('/', [OpenAIAdminController::class, 'index'])->name('index');
+        
+        // Create Project
+        Route::get('create', [OpenAIAdminController::class, 'create'])->name('create');
+        Route::post('/', [OpenAIAdminController::class, 'store'])->name('store');
+        
+        // Edit Project
+        Route::get('{projectId}/edit', [OpenAIAdminController::class, 'edit'])->name('edit');
+        Route::put('{projectId}', [OpenAIAdminController::class, 'update'])->name('update');
+        
+        // Show Project Details
+        Route::get('{projectId}', [OpenAIAdminController::class, 'show'])->name('show');
+        
+        // Archive Project
+        Route::post('{projectId}/archive', [OpenAIAdminController::class, 'archive'])->name('archive');
+    });
+
+
+    
+    
 });

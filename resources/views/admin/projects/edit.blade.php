@@ -132,7 +132,6 @@
                             <x-input-error :messages="$errors->get('image_generation')" class="mt-2" />
                         </div>
 
-
                         {{-- Buttons --}}
                         <div class="flex items-center gap-4">
                             <a href="{{ route('admin.projects.index') }}">

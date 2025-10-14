@@ -34,6 +34,7 @@
         @endif
     </form>
 </div>
+
 <div class="bg-white shadow-md rounded-lg" x-data="{ deleteId: null, deleteUrl: '' }">
     <div class="p-4">
         <div class="overflow-hidden">
@@ -73,20 +74,21 @@
                                     <td class="p-4 border-b py-5 text-sm">
                                         @if ($key === 'actions')
                                             @foreach($cell as $action)
-                                                @if($action['name'] === 'delete')
-                                                    <x-button
-                                                        color="red"
-                                                        x-on:click.prevent="
-                                                            deleteId = '{{ $row['id'] }}';
-                                                            deleteUrl = '{{ $action['url'] }}';
-                                                            $dispatch('open-modal', 'confirm-deletion');
-                                                        "
-                                                    >
-                                                        {{ $action['label'] }}
-                                                    </x-button>
-                                                @else
+                                                @php
+                                                    // Set default color if 'color' is missing
+                                                    $actionColor = $action['color'] ?? 'gray'; 
+                                                @endphp
+                                                
+                                                @if(isset($action['form']))
+                                                    <!-- Render Form-based Actions like Archive -->
+                                                    <form method="POST" action="{{ $action['form']['action'] }}" style="display:inline-block;">
+                                                        @csrf
+                                                        <x-danger-button>{{ $action['form']['button_label'] }}</x-danger-button>
+                                                    </form>
+                                                @elseif(isset($action['url']))
+                                                    <!-- Render URL-based Actions like Show, Edit -->
                                                     <a href="{{ $action['url'] }}" target="_blank">
-                                                        <x-button color="{{ $action['color'] }}">{{ $action['label'] }}</x-button>
+                                                        <x-button color="{{ $actionColor }}">{{ $action['label'] }}</x-button>
                                                     </a>
                                                 @endif
                                             @endforeach

@@ -9,6 +9,7 @@ return [
     'create' => 'Create',
     'created_at' => 'Created At',
     'delete' => 'Delete',
+    'archive' => 'Archive',
     'deselect_all' => 'Deselect All',
     'details' => 'Details',
     'edit' => 'Edit',
@@ -28,5 +29,7 @@ return [
     'no' => 'No',
     'yes' => 'Yes',
     'active' => 'Active',
-    'inactive' => 'In Active'
+    'inactive' => 'In Active',
+    'id' => 'Project ID',
+    'status' => 'Status'
 ];

@@ -15,6 +15,34 @@
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                         {{ trans('admin/navigation.dashboard') }}
                     </x-nav-link>
+                    
+                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
+                        {{ trans('admin/user.title_plural') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.roles.index')" :active="request()->routeIs('admin.roles.index')">
+                        {{ trans('admin/role.title_plural') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.permissions.index')" :active="request()->routeIs('admin.permissions.index')">
+                        {{ trans('admin/permission.title_plural') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.themes.index')" :active="request()->routeIs('admin.themes.index')">
+                        Theme
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.index')">
+                        Project
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.openai-projects.index')" :active="request()->routeIs('admin.openai-projects.index')">
+                        OpenAI Projects
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('admin.visitors.index')" :active="request()->routeIs('admin.visitors.index')">
+                        Visitor
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -74,6 +102,10 @@
 
                             <x-dropdown-link :href="route('admin.projects.index')">
                                 Project
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('admin.openai-projects.index')">
+                                OpenAI Projects
                             </x-dropdown-link>
 
                             <x-dropdown-link :href="route('admin.visitors.index')">
