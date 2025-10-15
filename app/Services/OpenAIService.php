@@ -125,16 +125,14 @@ class OpenAIService
     /**
      * List all projects from OpenAI.
      */
-    public function listProjects($after = null, $limit = 20, $includeArchived = false)
+    public function listProjects($after = null, $limit = null, $includeArchived = false)
     {
-        $params = [
-            'limit' => $limit,
-            'include_archived' => $includeArchived ? 'true' : 'false',
-        ];
+        $params = [];
 
-        if ($after) {
-            $params['after'] = $after;
-        }
+        $params = [ 'include_archived' => $includeArchived ? 'true' : 'false' ];
+
+        if($limit) $params['limit'] = $limit;
+        if ($after) $params['after'] = $after;
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $this->adminKey,
@@ -213,6 +211,27 @@ class OpenAIService
         ])->delete($this->baseUrl . "/organization/projects/{$projectId}");
 
         return $response->successful();
+    }
+
+    /**
+     * Get all API keys for a specific OpenAI project.
+     */
+    public function getProjectApiKeys(string $projectId, string $after = null, int $limit = 20)
+    {
+        $queryParams = [
+            'limit' => $limit,
+        ];
+
+        if ($after) {
+            $queryParams['after'] = $after;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->adminKey,
+            'Content-Type' => 'application/json',
+        ])->get("{$this->baseUrl}/organization/projects/{$projectId}/api_keys", $queryParams);
+
+        return $response->successful() ? $response->json() : null;
     }
 
 }

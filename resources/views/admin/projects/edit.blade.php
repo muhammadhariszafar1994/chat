@@ -9,52 +9,121 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-2xl">
-                    <form method="POST" action="{{ route('admin.projects.update', $project->id) }}" class="mt-6 space-y-6">
-                        @csrf
-                        @method('PUT')
+                    <!-- Tabs Navigation -->
+                    <div class="flex border-b">
+                        <button type="button" id="tab-project-details" class="py-2 px-4 text-blue-600 border-blue-600 focus:outline-none">Project Details</button>
+                        <button type="button" id="tab-chat-prompts" class="py-2 px-4 text-gray-600 hover:text-blue-600 focus:outline-none">Chat Prompts</button>
+                    </div>
 
-                        {{-- Project Name --}}
-                        <div>
-                            <x-input-label for="name" :value="__('admin/project.attributes.name')" :required="true" />
-                            <x-text-input 
-                                id="name" 
-                                name="name" 
-                                type="text" 
-                                class="mt-1 block w-full" 
-                                autocomplete="off" 
-                                value="{{ old('name', $project->name) }}"
-                            />
-                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-                        </div>
+                    <!-- Tab Content -->
+                    <div id="content-project-details" class="tab-content mt-6">
+                        <form method="POST" action="{{ route('admin.projects.update', $project->id) }}" class="mt-6 space-y-6">
+                            @csrf
+                            @method('PUT')
 
-                        {{-- Script --}}
-                        <div>
-                            <x-input-label for="script" :value="__('admin/project.attributes.script')" />
-                            <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 select-all">
-                                {{ $project->script }}
-                            </p>
-                            <!-- <textarea 
-                                id="script" 
-                                name="script" 
-                                rows="5" 
-                                class="mt-1 block w-full border rounded p-2"
-                            >{{ old('script', $project->script) }}</textarea>
-                            <x-input-error :messages="$errors->get('script')" class="mt-2" /> -->
-                        </div>
+                            {{-- Project Name --}}
+                            <div>
+                                <x-input-label for="name" :value="__('admin/project.attributes.name')" :required="true" />
+                                <x-text-input 
+                                    id="name" 
+                                    name="name" 
+                                    type="text" 
+                                    class="mt-1 block w-full" 
+                                    autocomplete="off" 
+                                    value="{{ old('name', $project->name) }}"
+                                />
+                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                            </div>
 
-                        {{-- OpenAI API Key --}}
-                        <div>
-                            <x-input-label for="openai_api_key" :value="__('admin/project.attributes.openai_api_key')" />
-                            <x-text-input 
-                                id="openai_api_key" 
-                                name="openai_api_key" 
-                                type="text" 
-                                class="mt-1 block w-full" 
-                                value="{{ old('openai_api_key', $project->openai_api_key) }}"
-                            />
-                            <x-input-error :messages="$errors->get('openai_api_key')" class="mt-2" />
-                        </div>
+                            {{-- Script --}}
+                            <div>
+                                <x-input-label for="script" :value="__('admin/project.attributes.script')" />
+                                <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 select-all">
+                                    {{ $project->script }}
+                                </p>
+                            </div>
 
+                            {{-- OpenAI Projects (Dropdown) --}}
+                            <div>
+                                <x-input-label for="openai_projects" :value="__('admin/project.attributes.openai_projects')" />
+                                <select id="openai_projects" name="openai_project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    <option value="">{{ __('global.select') }}</option>
+                                    @foreach($projects as $key => $value)
+                                        <option value="{{ $key }}" @selected(old('openai_project_id', $project->openai_project_id) == $key)>{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('openai_project_id')" class="mt-2" />
+                            </div>
+
+
+                            {{-- OpenAI API Key (Dropdown) --}}
+                            <div>
+                                <x-input-label for="openai_api_key" :value="__('admin/project.attributes.openai_api_key')" />
+                                <select id="openai_api_key" name="openai_api_key" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" disabled>
+                                    <option value="">{{ __('global.select') }}</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('openai_api_key')" class="mt-2" />
+                            </div>
+
+                            {{-- Client URL --}}
+                            <div>
+                                <x-input-label for="client_url" :value="__('admin/project.attributes.client_url')" />
+                                <x-text-input 
+                                    id="client_url" 
+                                    name="client_url" 
+                                    type="url" 
+                                    class="mt-1 block w-full" 
+                                    value="{{ old('client_url', $project->client_url) }}"
+                                    placeholder="https://example.com"
+                                />
+                                <x-input-error :messages="$errors->get('client_url')" class="mt-2" />
+                            </div>
+
+                            {{-- Token (Display Only) --}}
+                            <div>
+                                <x-input-label for="token" :value="__('admin/project.attributes.token')" />
+                                <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
+                                    {{ $project->token }}
+                                </p>
+                            </div>
+
+                            {{-- Theme --}}
+                            <div>
+                                <x-input-label for="theme_id" :value="__('admin/project.attributes.theme_id')" />
+                                <x-select-input
+                                    :options="$themes->pluck('name', 'id')"
+                                    id="theme_id"
+                                    name="theme_id"
+                                    class="mt-1 block w-full"
+                                    :selected="old('theme_id', $project->theme_id)"
+                                />
+                                <x-input-error :messages="$errors->get('theme_id')" class="mt-2" />
+                            </div>
+
+                            {{-- User --}}
+                            <div>
+                                <x-input-label for="user_id" :value="__('admin/project.attributes.user_id')" />
+                                <x-select-input
+                                    :options="$users->pluck('name', 'id')"
+                                    id="user_id"
+                                    name="user_id"
+                                    class="mt-1 block w-full"
+                                    :selected="old('user_id', $project->user_id)"
+                                />
+                                <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
+                            </div>
+
+                            {{-- Buttons --}}
+                            <div class="flex items-center gap-4 mt-4">
+                                <a href="{{ route('admin.projects.index') }}">
+                                    <x-secondary-button>{{ __('global.back') }}</x-secondary-button>
+                                </a>
+                                <x-primary-button>{{ __('global.save') }}</x-primary-button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="content-chat-prompts" class="tab-content mt-6 space-y-6 hidden">
                         {{-- OpenAI Prompt ID --}}
                         <div>
                             <x-input-label for="openai_prompt_id" :value="__('admin/project.attributes.openai_prompt_id')" />
@@ -68,52 +137,15 @@
                             <x-input-error :messages="$errors->get('openai_prompt_id')" class="mt-2" />
                         </div>
 
-                        {{-- Client URL --}}
+                        {{-- Chat Prompts (Textarea) --}}
                         <div>
-                            <x-input-label for="client_url" :value="__('admin/project.attributes.client_url')" />
-                            <x-text-input 
-                                id="client_url" 
-                                name="client_url" 
-                                type="url" 
-                                class="mt-1 block w-full" 
-                                value="{{ old('client_url', $project->client_url) }}"
-                                placeholder="https://example.com"
-                            />
-                            <x-input-error :messages="$errors->get('client_url')" class="mt-2" />
-                        </div>
-
-                        {{-- Token (Display Only) --}}
-                        <div>
-                            <x-input-label for="token" :value="__('admin/project.attributes.token')" />
-                            <p class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 text-sm text-gray-700">
-                                {{ $project->token }}
-                            </p>
-                        </div>
-
-                        {{-- Theme --}}
-                        <div>
-                            <x-input-label for="theme_id" :value="__('admin/project.attributes.theme_id')" />
-                            <x-select-input
-                                :options="$themes->pluck('name', 'id')"
-                                id="theme_id"
-                                name="theme_id"
+                            <x-input-label for="chat_prompt" :value="__('admin/project.attributes.chat_prompt')" />
+                            <x-textarea 
+                                id="chat_prompt" 
+                                name="chat_prompt" 
                                 class="mt-1 block w-full"
-                                :selected="old('theme_id', $project->theme_id)"
-                            />
-                            <x-input-error :messages="$errors->get('theme_id')" class="mt-2" />
-                        </div>
-
-                        {{-- User --}}
-                        <div>
-                            <x-input-label for="user_id" :value="__('admin/project.attributes.user_id')" />
-                            <x-select-input
-                                :options="$users->pluck('name', 'id')"
-                                id="user_id"
-                                name="user_id"
-                                class="mt-1 block w-full"
-                                :selected="old('user_id', $project->user_id)"
-                            />
-                            <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
+                            >{{ old('chat_prompt', $project->chat_prompt) }}</x-textarea>
+                            <x-input-error :messages="$errors->get('chat_prompt')" class="mt-2" />
                         </div>
 
                         {{-- Image Generation (Select) --}}
@@ -131,17 +163,83 @@
                             />
                             <x-input-error :messages="$errors->get('image_generation')" class="mt-2" />
                         </div>
-
-                        {{-- Buttons --}}
-                        <div class="flex items-center gap-4">
-                            <a href="{{ route('admin.projects.index') }}">
-                                <x-secondary-button>{{ __('global.back') }}</x-secondary-button>
-                            </a>
-                            <x-primary-button>{{ __('global.save') }}</x-primary-button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(() => { document.getElementById('openai_projects').dispatchEvent(new Event('change')) }, 1000);
+
+            document.getElementById('tab-project-details').addEventListener('click', function() {
+                document.getElementById('content-project-details').classList.remove('hidden');
+                document.getElementById('content-chat-prompts').classList.add('hidden');
+                document.getElementById('tab-project-details').classList.add('border-blue-600', 'text-blue-600');
+                document.getElementById('tab-chat-prompts').classList.remove('border-blue-600', 'text-blue-600');
+            });
+
+            document.getElementById('tab-chat-prompts').addEventListener('click', function() {
+                document.getElementById('content-chat-prompts').classList.remove('hidden');
+                document.getElementById('content-project-details').classList.add('hidden');
+                document.getElementById('tab-chat-prompts').classList.add('border-blue-600', 'text-blue-600');
+                document.getElementById('tab-project-details').classList.remove('border-blue-600', 'text-blue-600');
+            });
+
+            const projectSelect = document.getElementById('openai_projects');
+            const apiKeySelect = document.getElementById('openai_api_key');
+
+            if (!projectSelect || !apiKeySelect) {
+                console.warn('Select inputs not found');
+                return;
+            }
+
+            if (!projectSelect.value) {
+                apiKeySelect.disabled = true;
+            }
+
+            projectSelect.addEventListener('change', function () {
+                const projectId = this.value;
+
+                apiKeySelect.innerHTML = `<option value="">{{ __('global.select') }}</option>`;
+
+                if (!projectId) {
+                    apiKeySelect.disabled = true;
+                    return;
+                }
+
+                fetch(`{{ route('admin.projectApiKeys') }}?project_id=${projectId}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    apiKeySelect.disabled = false;
+                    apiKeySelect.innerHTML = '';
+
+                    if (Object.keys(data).length === 0) {
+                        apiKeySelect.innerHTML = `<option value="">No API keys available</option>`;
+                        apiKeySelect.disabled = true;
+                        return;
+                    }
+
+                    for (const [label, key] of Object.entries(data)) {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = label;
+                        if('{{$project->openai_api_key}}' === key) option.selected = true
+                        apiKeySelect.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error('API key fetch error:', error);
+                    apiKeySelect.innerHTML = `<option value="">Error loading keys</option>`;
+                    apiKeySelect.disabled = true;
+                });
+            });
+        });
+    </script>
 </x-admin-layout>

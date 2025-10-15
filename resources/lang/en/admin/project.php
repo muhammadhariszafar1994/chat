@@ -10,7 +10,9 @@ return [
         'client_url'      => 'Client URL',
         'theme_id'        => 'Theme',
         'user_id'         => 'User',
-        'image_generation' => 'Image Generation'
+        'image_generation' => 'Image Generation',
+        'chat_prompt' => 'Chat Prompt',
+        'openai_projects' => 'Open AI Projects'
     ],
 
     'title'        => 'Project',

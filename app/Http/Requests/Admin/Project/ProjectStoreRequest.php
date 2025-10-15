@@ -16,12 +16,13 @@ class ProjectStoreRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'script' => 'nullable|string',
+            'openai_project_id' => 'nullable|string|max:255',
             'openai_api_key' => 'nullable|string|max:255',
             'openai_prompt_id' => 'nullable|string|max:255',
             'client_url' => 'nullable|url|max:255',
             'theme_id' => 'nullable|exists:themes,id',
             'user_id' => 'required|exists:users,id',
-            'image_generation' => 'required|in:0,1',
+            // 'image_generation' => 'required|in:0,1',
         ];
     }
 
@@ -33,6 +34,9 @@ class ProjectStoreRequest extends FormRequest
             'name.max' => 'Project name cannot exceed 255 characters.',
 
             'script.string' => 'Script must be a valid string.',
+
+            'openai_project_id.string' => 'OpenAI Project ID must be a string.',
+            'openai_project_id.max' => 'OpenAI Project ID cannot exceed 255 characters.',
 
             'openai_api_key.string' => 'OpenAI API Key must be a string.',
             'openai_api_key.max' => 'OpenAI API Key cannot exceed 255 characters.',
@@ -47,8 +51,8 @@ class ProjectStoreRequest extends FormRequest
             'user_id.required' => 'User is required.',
             'user_id.exists' => 'Selected user does not exist.',
 
-            'image_generation.required' => 'Please specify if this image generation should be active.',
-            'image_generation.in' => 'Image generation must be either Yes (1) or No (0).'
+            // 'image_generation.required' => 'Please specify if this image generation should be active.',
+            // 'image_generation.in' => 'Image generation must be either Yes (1) or No (0).'
         ];
     }
 }

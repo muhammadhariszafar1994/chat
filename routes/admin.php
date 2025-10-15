@@ -45,6 +45,8 @@ Route::middleware([AdminAuthenticate::class, CheckInternalUserStatus::class])->g
     Route::resource('/themes', ThemeController::class);
 
     // Project
+    
+    Route::get('/projects/api-keys', [ProjectController::class, 'projectApiKeys'])->name('projectApiKeys');
     Route::resource('/projects', ProjectController::class);
 
     // Project

@@ -12,9 +12,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\OpenAIService;
 
 class ProjectController extends Controller
 {
+    protected $openAIService;
+
+    public function __construct(
+        OpenAIService $openAIService
+    )
+    {
+        $this->openAIService = $openAIService;
+    }
+
     /**
      * Display a listing of projects.
      */
@@ -45,8 +55,15 @@ class ProjectController extends Controller
 
         $themes = Theme::all();
         $users = User::all();
+        $apiKeys = [];
 
-        return view('admin.projects.create', compact('themes', 'users'));
+        $openAIProjects = $this->openAIService->listProjects();
+
+        $projects = collect($openAIProjects['data'] ?? [])
+            ->pluck('name', 'id')
+            ->toArray();
+
+        return view('admin.projects.create', compact('themes', 'users', 'projects', 'apiKeys'));
     }
 
     /**
@@ -90,8 +107,15 @@ class ProjectController extends Controller
 
         $themes = Theme::all();
         $users = User::all();
+        $apiKeys = [];
 
-        return view('admin.projects.edit', compact('project', 'themes', 'users'));
+        $openAIProjects = $this->openAIService->listProjects();
+
+        $projects = collect($openAIProjects['data'] ?? [])
+            ->pluck('name', 'id')
+            ->toArray();
+
+        return view('admin.projects.edit', compact('project', 'themes', 'users', 'projects', 'apiKeys'));
     }
 
     /**
@@ -125,4 +149,32 @@ class ProjectController extends Controller
             ->route('admin.projects.index')
             ->with('success', 'Project deleted successfully.');
     }
+
+    /**
+     * Get OpenAI API keys for a given project ID.
+     */
+    public function projectApiKeys(Request $request)
+    {
+        $projectId = $request->get('project_id');
+
+        if (!$projectId) {
+            return response()->json(['message' => 'Project ID is required'], 400);
+        }
+
+        $after = $request->get('after');
+        $limit = $request->get('limit', 20);
+
+        $apiKeysData = $this->openAIService->getProjectApiKeys($projectId, $after, $limit);
+
+        if (!$apiKeysData) {
+            return response()->json(['message' => 'Failed to fetch API keys'], 500);
+        }
+
+        $keys = collect($apiKeysData['data'] ?? [])
+            ->pluck('id', 'name')
+            ->toArray();
+
+        return response()->json($keys);
+    }
+
 }

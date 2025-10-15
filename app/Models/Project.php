@@ -13,6 +13,7 @@ class Project extends Model
         'name',
         'script',
         'token',
+        'openai_project_id',
         'openai_api_key',
         'openai_prompt_id',
         'client_url',
