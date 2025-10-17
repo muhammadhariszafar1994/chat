@@ -47,6 +47,7 @@ class VerifyTokenAndCors
         }
 
         $request->attributes->set('openai', [
+            'IMAGE_GENERATION' => $project->image_generation ?? 0,
             'OPENAI_API_KEY' => $project->openai_api_key ?? null,
             'OPENAI_PROMPT_ID' => $project->openai_prompt_id ?? null
         ]);

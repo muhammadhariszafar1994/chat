@@ -97,6 +97,19 @@
                                 <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
                             </div>
 
+                            {{-- OpenAI Prompt ID --}}
+                            <div>
+                                <x-input-label for="openai_prompt_id" :value="__('admin/project.attributes.openai_prompt_id')" />
+                                <x-text-input 
+                                    id="openai_prompt_id" 
+                                    name="openai_prompt_id" 
+                                    type="text" 
+                                    class="mt-1 block w-full" 
+                                    value="{{ old('openai_prompt_id') }}"
+                                />
+                                <x-input-error :messages="$errors->get('openai_prompt_id')" class="mt-2" />
+                            </div>
+
                             {{-- Buttons --}}
                             <div class="flex items-center gap-4 mt-4">
                                 <a href="{{ route('admin.projects.index') }}">
@@ -106,22 +119,8 @@
                             </div>
                         </form>
                     </div>
-
-                    <div id="content-chat-prompts" class="tab-content mt-6 space-y-6 hidden">
-                        {{-- OpenAI Prompt ID --}}
-                        <div>
-                            <x-input-label for="openai_prompt_id" :value="__('admin/project.attributes.openai_prompt_id')" />
-                            <x-text-input 
-                                id="openai_prompt_id" 
-                                name="openai_prompt_id" 
-                                type="text" 
-                                class="mt-1 block w-full" 
-                                value="{{ old('openai_prompt_id') }}"
-                            />
-                            <x-input-error :messages="$errors->get('openai_prompt_id')" class="mt-2" />
-                        </div>
-
-                        {{-- Chat Prompts (e.g., Textarea) --}}
+{{-- 
+                    <div id="content-chat-prompts" class="tab-content mt-6 space-y-6 hidden">                        
                         <div>
                             <x-input-label for="chat_prompt" :value="__('admin/project.attributes.chat_prompt')" />
                             <x-textarea 
@@ -132,7 +131,6 @@
                             <x-input-error :messages="$errors->get('chat_prompt')" class="mt-2" />
                         </div>
 
-                        {{-- Image Generation (Select) --}}
                         <div>
                             <x-input-label for="image_generation" :value="__('admin/project.attributes.image_generation')" />
                             <x-select-input
@@ -147,6 +145,7 @@
                             />
                             <x-input-error :messages="$errors->get('image_generation')" class="mt-2" />
                         </div>
+--}}
                     </div>
                 </div>
             </div>
@@ -197,7 +196,7 @@
                 .then(response => response.json())
                 .then(data => {
                     apiKeySelect.disabled = false;
-                    apiKeySelect.innerHTML = '';
+                    apiKeySelect.innerHTML = '<option value="">{{ __('global.select') }}</option>';
 
                     if (Object.keys(data).length === 0) {
                         apiKeySelect.innerHTML = `<option value="">No API keys available</option>`;
@@ -217,6 +216,28 @@
                     apiKeySelect.innerHTML = `<option value="">Error loading keys</option>`;
                     apiKeySelect.disabled = true;
                 });
+            });
+
+            apiKeySelect.addEventListener('change', function () {
+                const apiKey = this.value;
+                const projectId = projectSelect.value;
+
+                if (apiKey && projectId) {
+                    fetch(`{{ route('admin.projectApiKeyDetails') }}?project_id=${projectId}&key_id=${apiKey}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Process the API key details (can be displayed or used as needed)
+                        console.log('API Key Details:', data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching API key details:', error);
+                    });
+                }
             });
         });
     </script>

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class OpenAIService
 {
@@ -33,24 +34,31 @@ class OpenAIService
         return $response->successful() ? $response->json() : null;
     }
 
-    public function sendMessageToConversation($openai, $conversationId, $message, $topic = 'demo')
+    public function sendMessageToConversation($openai, $conversationId, $message, $image_generation = true)
     {
         $data = [
-            "prompt" => [
-                "id" => $openai['OPENAI_PROMPT_ID'],
-                "version" => "5"
-            ],
+            'model' => 'gpt-4o',
             'conversation' => $conversationId,
             "input" => $message,
             'store' => true
         ];
+
+        if ($image_generation) {
+            $data['tools'] = [
+                [
+                    "type" => "image_generation"
+                ]
+            ];
+
+            if(!$openai['IMAGE_GENERATION']) throw new \Exception('Image generation not enabled for this organization.');
+        }
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $openai['OPENAI_API_KEY'],
             'Content-Type' => 'application/json',
         ])->post($this->baseUrl . '/responses', $data);
 
-        return $response->successful() ? $response->json() : null;
+        return $response->json();
     }
 
     public function getConversationResponses($openai, $conversationId)
@@ -234,4 +242,29 @@ class OpenAIService
         return $response->successful() ? $response->json() : null;
     }
 
+    /**
+     * Get details of a specific API key.
+     */
+    public function getApiKeyDetails($projectId, $apiKeyId)
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->adminKey,
+            'Content-Type' => 'application/json',
+        ])->get("{$this->baseUrl}/organization/projects/{$projectId}/api_keys/{$apiKeyId}");
+
+        return $response->successful() ? $response->json() : null;
+    }
+
+    /**
+     * Delete a specific API key.
+     */
+    public function deleteApiKey($projectId, $apiKeyId)
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->adminKey,
+            'Content-Type' => 'application/json',
+        ])->delete("{$this->baseUrl}/organization/projects/{$projectId}/api_keys/{$apiKeyId}");
+
+        return $response->successful();
+    }
 }

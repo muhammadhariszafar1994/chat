@@ -177,4 +177,33 @@ class ProjectController extends Controller
         return response()->json($keys);
     }
 
+    public function projectApiKeyDetails(Request $request)
+    {
+        $projectId = $request->get('project_id');
+        $keyId = $request->get('key_id');
+
+        if (!$projectId) {
+            return response()->json(['message' => 'Project ID is required'], 400);
+        }
+
+        if (!$keyId) {
+            return response()->json(['message' => 'Key ID is required'], 400);
+        }
+
+        $after = $request->get('after');
+        $limit = $request->get('limit', 20);
+
+        $apiKeysData = $this->openAIService->getApiKeyDetails($projectId, $keyId);
+
+        if (!$apiKeysData) {
+            return response()->json(['message' => 'Failed to fetch API keys'], 500);
+        }
+
+        $keys = collect($apiKeysData['data'] ?? [])
+            ->pluck('id', 'name')
+            ->toArray();
+
+        return response()->json($keys);
+    }
+
 }

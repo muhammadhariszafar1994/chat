@@ -47,6 +47,7 @@ Route::middleware([AdminAuthenticate::class, CheckInternalUserStatus::class])->g
     // Project
     
     Route::get('/projects/api-keys', [ProjectController::class, 'projectApiKeys'])->name('projectApiKeys');
+    Route::get('/projects/api-key-details', [ProjectController::class, 'projectApiKeyDetails'])->name('projectApiKeyDetails');
     Route::resource('/projects', ProjectController::class);
 
     // Project

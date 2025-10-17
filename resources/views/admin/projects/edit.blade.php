@@ -12,7 +12,6 @@
                     <!-- Tabs Navigation -->
                     <div class="flex border-b">
                         <button type="button" id="tab-project-details" class="py-2 px-4 text-blue-600 border-blue-600 focus:outline-none">Project Details</button>
-                        <button type="button" id="tab-chat-prompts" class="py-2 px-4 text-gray-600 hover:text-blue-600 focus:outline-none">Chat Prompts</button>
                     </div>
 
                     <!-- Tab Content -->
@@ -113,6 +112,19 @@
                                 <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
                             </div>
 
+                            {{-- OpenAI Prompt ID --}}
+                            <div>
+                                <x-input-label for="openai_prompt_id" :value="__('admin/project.attributes.openai_prompt_id')" />
+                                <x-text-input 
+                                    id="openai_prompt_id" 
+                                    name="openai_prompt_id" 
+                                    type="text" 
+                                    class="mt-1 block w-full" 
+                                    value="{{ old('openai_prompt_id', $project->openai_prompt_id) }}"
+                                />
+                                <x-input-error :messages="$errors->get('openai_prompt_id')" class="mt-2" />
+                            </div>
+
                             {{-- Buttons --}}
                             <div class="flex items-center gap-4 mt-4">
                                 <a href="{{ route('admin.projects.index') }}">
@@ -121,48 +133,6 @@
                                 <x-primary-button>{{ __('global.save') }}</x-primary-button>
                             </div>
                         </form>
-                    </div>
-
-                    <div id="content-chat-prompts" class="tab-content mt-6 space-y-6 hidden">
-                        {{-- OpenAI Prompt ID --}}
-                        <div>
-                            <x-input-label for="openai_prompt_id" :value="__('admin/project.attributes.openai_prompt_id')" />
-                            <x-text-input 
-                                id="openai_prompt_id" 
-                                name="openai_prompt_id" 
-                                type="text" 
-                                class="mt-1 block w-full" 
-                                value="{{ old('openai_prompt_id', $project->openai_prompt_id) }}"
-                            />
-                            <x-input-error :messages="$errors->get('openai_prompt_id')" class="mt-2" />
-                        </div>
-
-                        {{-- Chat Prompts (Textarea) --}}
-                        <div>
-                            <x-input-label for="chat_prompt" :value="__('admin/project.attributes.chat_prompt')" />
-                            <x-textarea 
-                                id="chat_prompt" 
-                                name="chat_prompt" 
-                                class="mt-1 block w-full"
-                            >{{ old('chat_prompt', $project->chat_prompt) }}</x-textarea>
-                            <x-input-error :messages="$errors->get('chat_prompt')" class="mt-2" />
-                        </div>
-
-                        {{-- Image Generation (Select) --}}
-                        <div>
-                            <x-input-label for="image_generation" :value="__('admin/project.attributes.image_generation')" />
-                            <x-select-input
-                                :options="[
-                                    0 => __('global.no'),
-                                    1 => __('global.yes'),
-                                ]"
-                                id="image_generation"
-                                name="image_generation"
-                                class="mt-1 block w-full"
-                                :selected="old('image_generation', $project->image_generation)"
-                            />
-                            <x-input-error :messages="$errors->get('image_generation')" class="mt-2" />
-                        </div>
                     </div>
                 </div>
             </div>
@@ -177,14 +147,6 @@
                 document.getElementById('content-project-details').classList.remove('hidden');
                 document.getElementById('content-chat-prompts').classList.add('hidden');
                 document.getElementById('tab-project-details').classList.add('border-blue-600', 'text-blue-600');
-                document.getElementById('tab-chat-prompts').classList.remove('border-blue-600', 'text-blue-600');
-            });
-
-            document.getElementById('tab-chat-prompts').addEventListener('click', function() {
-                document.getElementById('content-chat-prompts').classList.remove('hidden');
-                document.getElementById('content-project-details').classList.add('hidden');
-                document.getElementById('tab-chat-prompts').classList.add('border-blue-600', 'text-blue-600');
-                document.getElementById('tab-project-details').classList.remove('border-blue-600', 'text-blue-600');
             });
 
             const projectSelect = document.getElementById('openai_projects');

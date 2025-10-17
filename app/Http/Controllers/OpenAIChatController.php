@@ -20,22 +20,25 @@ class OpenAIChatController extends Controller
 
     public function sendMessageToConversation(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'message' => 'required|string',
+            ]);
 
-        $ip = $request->ip();
-        $openai = $request->attributes->get('openai');
-        $message = $request->input('message');
+            $ip = $request->ip();
+            $openai = $request->attributes->get('openai');
+            $message = $request->input('message');
+            $image_generation = true;
 
-        $conversationId = $this->findOrCreateConversation($ip, $openai);
-        
-        $response = $this->openAIService->sendMessageToConversation($openai, $conversationId, $message);
+            if($request->has('image_generation')) $image_generation = (boolean)$image_generation->input('image_generation');
 
-        if ($response) {
+            $conversationId = $this->findOrCreateConversation($ip, $openai);
+
+            $response = $this->openAIService->sendMessageToConversation($openai, $conversationId, $message, $image_generation);
+
             return response()->json(['message' => 'Message sent successfully!', 'response' => $response]);
-        } else {
-            return response()->json(['message' => 'Failed to send message'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
